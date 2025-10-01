@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Teacher Assignment Module</title>
+  <style>
+    /* ... [same CSS as before] ... */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f0f3f5;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 250px;
+      background: #2c3e50;
+      color: white;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .sidebar h2 {
+      margin-top: 0;
+      margin-bottom: 20px;
+    }
+
+    .main {
+      flex: 1;
+      padding: 25px 40px;
+      box-sizing: border-box;
+      overflow-y: auto;
+    }
+
+    h1 {
+      margin-top: 0;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 6px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+      margin-bottom: 30px;
+    }
+
+    label {
+      display: block;
+      margin: 15px 0 6px;
+      font-weight: bold;
+    }
+
+    input[type="text"],
+    input[type="file"] {
+      width: 100%;
+      padding: 8px 10px;
+      font-size: 14px;
+    }
+
+    button {
+      margin-top: 15px;
+      background: #1abc9c;
+      border: none;
+      padding: 12px 20px;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background: #16a085;
+    }
+
+    .list-container {
+      display: flex;
+      gap: 40px;
+    }
+
+    .list {
+      flex: 1;
+      background: white;
+      padding: 20px;
+      border-radius: 6px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .list h3 {
+      margin-top: 0;
+      margin-bottom: 15px;
+      color: #34495e;
+    }
+
+    ul {
+      list-style: none;
+      padding-left: 0;
+      margin: 0;
+    }
+
+    ul li {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    ul li:hover {
+      background-color: #ecf0f1;
+    }
+
+    ul li.checked {
+      background-color: #d4f7dc;
+    }
+
+    .status {
+      font-size: 12px;
+      padding: 2px 8px;
+      border-radius: 12px;
+      color: white;
+    }
+
+    .status.checked {
+      background-color: #27ae60;
+    }
+
+    .status.pending {
+      background-color: #e67e22;
+    }
+
+    .preview-box {
+      margin-top: 30px;
+      background: white;
+      border-radius: 6px;
+      padding: 20px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+      display: none;
+    }
+
+    .preview-content img {
+      max-width: 100%;
+      border-radius: 6px;
+    }
+
+    .preview-content pre {
+      background: #f7f7f7;
+      padding: 15px;
+      border-radius: 6px;
+      max-height: 250px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    .no-preview {
+      font-style: italic;
+      color: #999;
+    }
+  </style>
+</head>
+
+<body>
+  <aside class="sidebar">
+    <h2>Teacher Dashboard</h2>
+    <p>Upload & check assignments</p>
+  </aside>
+
+  <section class="main">
+    <h1>Upload New Assignment</h1>
+    <div class="card">
+      <form id="assignmentForm">
+        <label for="assignmentTitle">Assignment Title:</label>
+        <input type="text" id="assignmentTitle" placeholder="Enter assignment title" required />
+
+        <label for="assignmentFile">Upload Assignment File:</label>
+        <input type="file" id="assignmentFile" accept=".pdf,.doc,.docx,.txt" required />
+
+        <button type="submit">Upload Assignment</button>
+      </form>
+    </div>
+
+    <div class="list-container">
+      <div class="list">
+        <h3>Current Assignments</h3>
+        <ul id="assignmentsList">
+          <li>No assignments uploaded yet.</li>
+        </ul>
+      </div>
+
+      <div class="list">
+        <h3>Student Submissions</h3>
+        <ul id="submissionsList">
+          <li>No submissions yet.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="preview-box" id="previewBox">
+      <h3>Submission Preview</h3>
+      <div class="preview-content" id="previewContent"></div>
+      <button id="markCheckedBtn">Mark as Checked</button>
+    </div>
+
+    <!-- <h1>Student Submission Interface</h1> 
+    <div class="card">
+      <form id="studentSubmitForm">
+        <label>Student Name:</label>
+        <input type="text" id="studentName" required />
+
+        <label>Upload Assignment File:</label>
+        <input type="file" id="studentFile" accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg" required />
+
+        <button type="submit">Submit Assignment</button>
+      </form>
+    </div>
+     -->
+  </section>
+
+  <script>
+    const assignmentForm = document.getElementById('assignmentForm');
+    const assignmentsList = document.getElementById('assignmentsList');
+    const submissionsList = document.getElementById('submissionsList');
+    const previewBox = document.getElementById('previewBox');
+    const previewContent = document.getElementById('previewContent');
+    const markCheckedBtn = document.getElementById('markCheckedBtn');
+    const studentSubmitForm = document.getElementById('studentSubmitForm');
+
+    let assignments = [];
+    let submissions = [];
+    let selectedSubmissionId = null;
+
+    function generateId() {
+      return '_' + Math.random().toString(36).substr(2, 9);
+    }
+
+    function renderAssignments() {
+      if (assignments.length === 0) {
+        assignmentsList.innerHTML = '<li>No assignments uploaded yet.</li>';
+        return;
+      }
+      assignmentsList.innerHTML = '';
+      assignments.forEach(a => {
+        const li = document.createElement('li');
+        li.textContent = a.title;
+        assignmentsList.appendChild(li);
+      });
+    }
+
+    function renderSubmissions() {
+      if (submissions.length === 0) {
+        submissionsList.innerHTML = '<li>No submissions yet.</li>';
+        previewBox.style.display = 'none';
+        return;
+      }
+      submissionsList.innerHTML = '';
+      submissions.forEach(sub => {
+        const li = document.createElement('li');
+        li.textContent = sub.studentName + " - " + sub.file.name;
+        li.dataset.id = sub.id;
+        li.classList.toggle('checked', sub.checked);
+
+        const statusSpan = document.createElement('span');
+        statusSpan.classList.add('status', sub.checked ? 'checked' : 'pending');
+        statusSpan.textContent = sub.checked ? "Checked" : "Pending";
+        li.appendChild(statusSpan);
+
+        li.addEventListener('click', () => showSubmissionPreview(sub.id));
+        submissionsList.appendChild(li);
+      });
+    }
+
+    function showSubmissionPreview(id) {
+      const sub = submissions.find(s => s.id === id);
+      if (!sub) return;
+
+      selectedSubmissionId = id;
+      previewBox.style.display = 'block';
+      previewContent.innerHTML = '';
+
+      const file = sub.file;
+      const fileType = file.type;
+
+      if (fileType.startsWith('image/')) {
+        const img = document.createElement('img');
+        const url = URL.createObjectURL(file);
+        img.src = url;
+        img.onload = () => URL.revokeObjectURL(url);
+        previewContent.appendChild(img);
+      } else if (fileType === 'text/plain') {
+        const reader = new FileReader();
+        reader.onload = e => {
+          const pre = document.createElement('pre');
+          pre.textContent = e.target.result.substring(0, 2000);
+          previewContent.appendChild(pre);
+        };
+        reader.readAsText(file);
+      } else if (fileType === 'application/pdf') {
+        const iframe = document.createElement('iframe');
+        iframe.src = URL.createObjectURL(file);
+        iframe.width = "100%";
+        iframe.height = "400px";
+        previewContent.appendChild(iframe);
+      } else if (file.name.endsWith('.doc') || file.name.endsWith('.docx')) {
+        previewContent.innerHTML = `<p class="no-preview">DOC/DOCX preview not supported.<br>
+        <a href="${URL.createObjectURL(file)}" target="_blank">Download File</a></p>`;
+      } else {
+        previewContent.innerHTML = `<p class="no-preview">No preview available.</p>`;
+      }
+    }
+
+    markCheckedBtn.addEventListener('click', () => {
+      if (selectedSubmissionId) {
+        const sub = submissions.find(s => s.id === selectedSubmissionId);
+        if (sub) {
+          sub.checked = true;
+          renderSubmissions();
+          previewBox.style.display = 'none';
+          alert('Submission marked as checked.');
+        }
+      }
+    });
+
+    assignmentForm.addEventListener('submit', e => {
+      e.preventDefault();
+      const title = document.getElementById('assignmentTitle').value.trim();
+      const file = document.getElementById('assignmentFile').files[0];
+      if (!title || !file) return alert("Fill in all fields");
+
+      assignments.push({ id: generateId(), title, file });
+      document.getElementById('assignmentTitle').value = '';
+      document.getElementById('assignmentFile').value = '';
+      renderAssignments();
+      alert("Assignment uploaded successfully!");
+    });
+
+    studentSubmitForm.addEventListener('submit', e => {
+      e.preventDefault();
+      const name = document.getElementById('studentName').value.trim();
+      const file = document.getElementById('studentFile').files[0];
+      if (!name || !file) return alert("Fill in all fields");
+
+      submissions.push({ id: generateId(), studentName: name, file, checked: false });
+      document.getElementById('studentName').value = '';
+      document.getElementById('studentFile').value = '';
+      renderSubmissions();
+      alert("Submission uploaded successfully!");
+    });
+
+    renderAssignments();
+    renderSubmissions();
+  </script>
+</body>
+
+</html>
